@@ -5,13 +5,19 @@ project(facial_puppetry)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
+	cv_bridge
+	image_transport
+	roscpp
+	sensor_msgs
+	std_msgs
+	usb_cam
+	message_generation
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(OpenCV REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -44,11 +50,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+add_message_files(
+    FILES
 #   Message1.msg
-#   Message2.msg
-# )
+   land_marks.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -69,6 +75,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   DEPENDENCIES
 #   std_msgs
 # )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -89,6 +99,14 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf1.cfg
 #   cfg/DynReconf2.cfg
 # )
+#generate_dynamic_reconfigure_options(
+# cfg/dlib_blender_mapping.cfg
+#)
+
+
+#generate_dynamic_reconfigure_options(
+#cfg/dlib_blender_mapping.cfg
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -102,7 +120,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES facial_puppetry
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -117,6 +135,12 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+include_directories(
+${OpenCV_INCLUDE_DIRS}
+)
+
+include(dlib/cmake)
+
 ## Declare a C++ library
 # add_library(facial_puppetry
 #   src/${PROJECT_NAME}/facial_puppetry.cpp
@@ -130,14 +154,26 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(facial_puppetry_node src/facial_puppetry_node.cpp)
 
+add_executable(dlib_core_node src/dlib_core.cpp)
+#add_executable(dlib_listener_node src/dlib_listener.cpp)
+
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(facial_puppetry_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#add_dependencies(dlib_listener_node ${PROJECT_NAME}_gencfg)
+
+
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(facial_puppetry_node
 #   ${catkin_LIBRARIES}
 # )
+
+target_link_libraries(dlib_core_node ${catkin_LIBRARIES})
+target_link_libraries(dlib_core_node dlib ${OpenCV_LIBS})
+#target_link_libraries(dlib_listener_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
